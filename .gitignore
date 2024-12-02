@@ -7,4 +7,5 @@ venv/
 dist/
 bin/
 */__pychache__/
+__pychache__/
 
