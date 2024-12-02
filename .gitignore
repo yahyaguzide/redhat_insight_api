@@ -6,4 +6,5 @@ venv/
 *.zip
 dist/
 bin/
+*/__pychache__/
 
