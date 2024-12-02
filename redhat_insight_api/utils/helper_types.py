@@ -21,7 +21,7 @@ class URLstr:
     def url(self, u: str) -> None:
         """setter for url"""
 
-        self._url = buf if (buf := u.strip())[-1] != "/" else buf[:-1]
+        self._url = u.strip().strip("/")
 
     def join(self, u: str | URLstr) -> URLstr:
         """
