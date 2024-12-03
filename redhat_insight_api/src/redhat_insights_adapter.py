@@ -5,7 +5,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from requests import Session, Response
-from redhat_insight_api.src.redhat_insights_exceptions import RHAPIConnectionError
+from redhat_insight_api.src.redhat_insights_exceptions import (
+    RHAPIConnectionError,
+    RHAPINoTokenError,
+)
 from redhat_insight_api.utils.helper_types import URLstr
 
 
@@ -76,7 +79,11 @@ class RedHatInsightAdapter:
 
         param action (str): Wich request to make
 
+        returns: requests.Response
         """
+
+        if self._api_token is None:
+            raise RHAPINoTokenError("No API Token set")
 
         url = str(self.base_url.join(endpoint))
         return self.session.request(
