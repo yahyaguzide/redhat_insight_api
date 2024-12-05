@@ -1,6 +1,6 @@
 """Adapter for RedHat Insights"""
 
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 
 from enum import Enum
 
@@ -29,27 +29,39 @@ class RedHatInsightAdapter:
     API key eventually run out of time, to get a new API Token use refresh_api_token()
     """
 
-    _refresh_token: str
-    _api_token: str
-    base_url: URLstr = field(default=URLstr("https://console.redhat.com/api"))
+    refresh_token: InitVar[str | None] = field(default=None)
+    api_token: InitVar[str | None] = field(default=None)
+    _refresh_token: str | None = field(init=False)
+    _api_token: str | None = field(init=False)
+    base_url: URLstr = field(
+        default_factory=lambda: URLstr("https://console.redhat.com/api")
+    )
     session: Session = field(default_factory=Session)
     refresh_url: URLstr = field(
-        default=URLstr(
+        default_factory=lambda: URLstr(
             "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
         )
     )
     headers: dict[str, str] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, refresh_token, api_token) -> None:
         """Post init"""
 
-        self.refresh_api_token()
+        self._refresh_token = refresh_token
+        self._api_token = api_token
+
+        # NOTE: Allow API token to be set individually
+        if self._api_token is None:
+            self.refresh_api_token()
 
     def close(self) -> None:
         self.session.close()
 
     def refresh_api_token(self) -> None:
         """Refresh the access token and save it to the api_token variable"""
+
+        if self._refresh_token is None:
+            raise RHAPINoTokenError("No Refresh Token set")
 
         data = {
             "refresh_token": self._refresh_token,
