@@ -81,6 +81,7 @@ class RedHatInventories(RedHatEndpointBase):
     def get_host_exists(self, insights_id: str) -> Response:
         """
         Find one host by insights_id, if it exists.
+
         Required permissions: inventory:hosts:read
 
         Status Codes:
@@ -91,7 +92,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         param insights_id (str): The Inisghts ID of the host
 
-        returns: request.Response
+        returns:requests.Response
         """
 
         path = "host_exists"
@@ -102,6 +103,7 @@ class RedHatInventories(RedHatEndpointBase):
     def delete_hosts(self, **params) -> Response:
         """
         Delete the entire list of hosts filtered by the given parameters.
+
         Required permissions: inventory:hosts:write
 
         Status Codes:
@@ -124,7 +126,7 @@ class RedHatInventories(RedHatEndpointBase):
                 tags
                 filter
 
-        returns: request.Response
+        returns:requests.Response
         """
         path = "hosts"
         return self.adapter.delete(
@@ -134,6 +136,7 @@ class RedHatInventories(RedHatEndpointBase):
     def get_hosts(self, **params) -> Response:
         """
         Read the entire list of all hosts available to the account.
+
         Required permissions: inventory:hosts:read
 
         Status Codes:
@@ -161,7 +164,7 @@ class RedHatInventories(RedHatEndpointBase):
                 filter
                 fields
 
-        returns: request.Response
+        returns:requests.Response
         """
         path = "hosts"
         return self.adapter.get(endpoint=str(self.endpoint.join(path)), params=params)
@@ -169,6 +172,7 @@ class RedHatInventories(RedHatEndpointBase):
     def delete_all_hosts(self, confirm_delete_all: bool = False) -> Response:
         """
         Delete all hosts on the account. The request must include "confirm_delete_all=true".
+
         Required permissions: inventory:hosts:write
 
         Status Codes:
@@ -176,7 +180,7 @@ class RedHatInventories(RedHatEndpointBase):
             400: Invalid request
 
 
-        returns: request.Response
+        returns:requests.Response
         """
         path = "hosts/all"
         return self.adapter.delete(
@@ -187,6 +191,7 @@ class RedHatInventories(RedHatEndpointBase):
     def post_host_checkin(self, json: dict[str, str]) -> Response:
         """
         Finds a host and updates its staleness timestamps. It uses the supplied canonical facts to determine which host to update. By default, the staleness timestamp is set to 1 hour from when the request is received; however, this can be overridden by supplying the interval.
+
         Required permissions: inventory:hosts:write
 
         Status Codes:
@@ -194,7 +199,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         param json (dict): Json object to send in the Request body
 
-        returns: request.Response
+        returns:requests.Response
         """
 
         path = "host/checkin"
@@ -203,6 +208,7 @@ class RedHatInventories(RedHatEndpointBase):
     def delete_hosts_by_id(self, host: str, *hosts: str, branch_id: str) -> Response:
         """
         Delete hosts by IDs. Accepts Hosts as Parameters.
+
         Required permissions: inventory:hosts:write
 
         Status Codes:
@@ -214,7 +220,7 @@ class RedHatInventories(RedHatEndpointBase):
         param *hosts (str): host IDs
         param branch_id (str): Filter by branch_id
 
-        returns: request.Response
+        returns:requests.Response
         """
 
         path = "hosts"
@@ -227,6 +233,7 @@ class RedHatInventories(RedHatEndpointBase):
     def get_hosts_by_id(self, host: str, *hosts, **params) -> Response:
         """
         Find one or more hosts by their ID.
+
         Required permissions: inventory:hosts:read
 
         Status Codes:
@@ -245,10 +252,10 @@ class RedHatInventories(RedHatEndpointBase):
                 order_how
                 fields
 
-        returns: request.Response
+        returns:requests.Response
         """
 
-        path = "host"
+        path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
         return self.adapter.delete(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
@@ -260,6 +267,7 @@ class RedHatInventories(RedHatEndpointBase):
     ) -> Response:
         """
         Update hosts_ids
+
         Required permissions: inventory:hosts:write
 
         Status Code:
@@ -273,12 +281,194 @@ class RedHatInventories(RedHatEndpointBase):
         param json (dict): Json object to be send in the request body.
             A group of fields to be updated on the host
 
-        returns: request.Response
+        returns:requests.Response
         """
-        path = "host"
+
+        path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
         return self.adapter.patch(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
             params={"branch_id": branch_id},
             json=json,
         )
+
+    def patch_hosts_merge_facts_under_namespace(
+        self,
+        host: str,
+        *hosts: str,
+        namespace: str,
+        json: dict[str, str],
+        branch_id: str | None = None,
+    ) -> Response:
+        """
+        Merge one or multiple hosts facts under a namespace.
+
+        Required permissions: inventory:hosts:write
+
+        Status Code:
+            200: Successfully merged facts
+            400: Invalid request
+            404: Host or namespace not found
+
+        param host (str): host ID
+        param *hosts (str): host IDs
+        param branch_id (str): Filter by branch_id
+        param json (dict): Json object to be send in the request body.
+            example:
+                {
+                  "fact1": "value1",
+                  "fact2": "value2"
+                }
+
+        returns:requests.Response
+        """
+
+        path = "hosts"
+        hosts_ids = ",".join([host] + list(hosts))
+        return self.adapter.patch(
+            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+            params={"branch_id": branch_id} if branch_id else None,
+            json=json,
+        )
+
+    def put_hosts_replace_facts_under_namespace(
+        self,
+        host: str,
+        *hosts: str,
+        namespace: str,
+        json: dict[str, str],
+        branch_id: str | None = None,
+    ) -> Response:
+        """
+        Replace facts under a namespace
+
+        Required permissions: inventory:hosts:write
+
+        Status Code:
+            200: Successfully replaced facts
+            400: Invalid request
+            404: Host or namespace not found
+
+        param host (str): host ID
+        param *hosts (str): host IDs
+        param branch_id (str): Filter by branch_id
+        param json (dict): Json object to be send in the request body.
+            example:
+                {
+                  "fact1": "value1",
+                  "fact2": "value2"
+                }
+
+        returns: requests.Response
+        """
+
+        path = "hosts"
+        hosts_ids = ",".join([host] + list(hosts))
+        return self.adapter.patch(
+            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+            params={"branch_id": branch_id} if branch_id else None,
+            json=json,
+        )
+
+    def get_hosts_system_profile(self, host: str, *hosts: str, **params) -> Response:
+        """
+        Find one or more hosts by their ID and return the id and system profile
+
+        Required permissions: inventory:hosts:read
+
+        Status Code:
+            200: Successfully searched for hosts
+            400: Invalid request
+            404: Host not found
+
+        param host (str): host ID
+        param *hosts (str): host IDs
+        param **params: List of Parameters
+            Accepted values:
+                per_page
+                page
+                order_by
+                order_how
+                branch_id
+                fields
+
+        returns: requests.Response
+        """
+
+        path = "hosts"
+        hosts_ids = ",".join([host] + list(hosts))
+        return self.adapter.patch(
+            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/system_profile")),
+            params=params,
+        )
+
+    def get_hosts_tags(self, host: str, *hosts: str, **params) -> Response:
+        """
+        Get the tags on a host
+
+        Required permissions: inventory:hosts:read
+
+        Status Code:
+            200: Successfully found tags
+            400: Invalid request
+
+        param host (str): host ID
+        param *hosts (str): host IDs
+        param **params: List of Parameters
+            Accepted values:
+                per_page
+                page
+                order_by
+                order_how
+                search
+
+        returns: requests.Response
+        """
+
+        path = "hosts"
+        hosts_ids = ",".join([host] + list(hosts))
+        return self.adapter.patch(
+            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags")),
+            params=params,
+        )
+
+    def get_hosts_tags_count(self, host: str, *hosts: str, **params) -> Response:
+        """
+        Get the number of tags on a host or hosts
+
+        Required permissions: inventory:hosts:read
+
+        Status Code:
+            200: Successfully found tag count
+            400: Invalid request
+
+        param host (str): host ID
+        param *hosts (str): host IDs
+        param **params: List of Parameters
+            Accepted values:
+                per_page
+                page
+                order_by
+                order_how
+
+        returns: requests.Response
+        """
+
+        path = "hosts"
+        hosts_ids = ",".join([host] + list(hosts))
+        return self.adapter.patch(
+            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags/count")),
+            params=params,
+        )
+
+    # """""""""""""""""""""""""""""""""""
+    # resource-types
+    # """""""""""""""""""""""""""""""""""
+
+    # """""""""""""""""""""""""""""""""""
+    # system_profile
+    # """""""""""""""""""""""""""""""""""
+
+    # """""""""""""""""""""""""""""""""""
+    # tags
+    # """""""""""""""""""""""""""""""""""
