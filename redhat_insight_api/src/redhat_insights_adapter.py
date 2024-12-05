@@ -53,6 +53,9 @@ class RedHatInsightAdapter:
         # NOTE: Allow API token to be set individually
         if self._api_token is None:
             self.refresh_api_token()
+        else:
+            # NOTE: Set header if only api_token is given
+            self.headers = {"Authorization": f"Bearer {self._api_token}"}
 
     def close(self) -> None:
         self.session.close()
