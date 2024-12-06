@@ -115,13 +115,11 @@ class Test_do_pu_patch_post_get:
         )
 
         mock_request.assert_called_with(
-            {
-                "method": "post",
-                "url": full_url,
-                "headers": {"Authorization": f"Bearer {api_token}"},
-                "params": None,
-                "json": None,
-            }
+            method="get",
+            url=full_url,
+            headers={"Authorization": f"Bearer {api_token}"},
+            params=None,
+            json=None,
         )
         assert response.status_code == 200
         assert response.json()["test"] == "mock_response"
@@ -143,7 +141,7 @@ class Test_do_pu_patch_post_get:
         )
 
         mock_request.assert_called_with(
-            method="post",
+            method="put",
             url=full_url,
             headers={"Authorization": f"Bearer {api_token}"},
             params=params,
@@ -169,7 +167,7 @@ class Test_do_pu_patch_post_get:
         )
 
         mock_request.assert_called_with(
-            method="post",
+            method="patch",
             url=full_url,
             headers={"Authorization": f"Bearer {api_token}"},
             params=params,
