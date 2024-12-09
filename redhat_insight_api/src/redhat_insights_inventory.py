@@ -6,6 +6,7 @@ Documentation: https://console.redhat.com/docs/api/inventory/v1#operations-accou
 from redhat_insight_api.src.redhat_endpoint_base import RedHatEndpointBase
 from redhat_insight_api.src.redhat_insights_adapter import RedHatInsightAdapter
 from redhat_insight_api.utils.helper_types import URLstr
+from redhat_insight_api.utils.helper_functions import list_to_chunks
 
 from requests import Response
 
@@ -257,7 +258,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.delete(
+        return self.adapter.get(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
             params=params,
         )
@@ -364,7 +365,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
+        return self.adapter.put(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
             params={"branch_id": branch_id} if branch_id else None,
             json=json,
@@ -397,7 +398,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
+        return self.adapter.get(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/system_profile")),
             params=params,
         )
@@ -427,7 +428,7 @@ class RedHatInventories(RedHatEndpointBase):
 
         path = "hosts"
         hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
+        return self.adapter.get(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags")),
             params=params,
         )
@@ -455,8 +456,10 @@ class RedHatInventories(RedHatEndpointBase):
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+
+        return self.adapter.get(
             endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags/count")),
             params=params,
         )
