@@ -7,5 +7,4 @@ venv/
 *.zip
 dist/
 bin/
-**/__pychache__/
-
+**/__pycache__/
