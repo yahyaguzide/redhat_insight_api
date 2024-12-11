@@ -7,3 +7,7 @@ class RHAPIConnectionError(Exception):
 
 class RHAPINoTokenError(Exception):
     """API Token not set"""
+
+
+class RHJSONDecodeError(Exception):
+    """Decode Error to Json"""

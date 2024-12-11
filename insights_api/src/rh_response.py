@@ -3,10 +3,10 @@ Custom RedHat Response Object
 """
 
 from dataclasses import dataclass, field, InitVar
-from json import loads
+from json import loads, JSONDecodeError
 from typing import Any
 
-from requests.exceptions import JSONDecodeError
+from .rh_exceptions import RHJSONDecodeError
 
 
 @dataclass
@@ -52,4 +52,4 @@ class RHresponse:
         try:
             return loads(self._content)
         except JSONDecodeError:
-            raise
+            raise RHJSONDecodeError
