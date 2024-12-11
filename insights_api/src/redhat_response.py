@@ -3,7 +3,10 @@ Custom RedHat Response Object
 """
 
 from dataclasses import dataclass, field, InitVar
-from json import dumps
+from json import loads
+from typing import Any
+
+from requests.exceptions import JSONDecodeError
 
 
 @dataclass
@@ -12,12 +15,11 @@ class RHresponse:
     headers: dict[str, str]
     reason: str
     url: str
-    json: InitVar[dict[str, str]]
-    _json: dict[str, str] = field(init=False, default_factory=dict)
-    _text: str | None = field(init=False, default=None)
+    content: InitVar[str] = field(default="")
+    _content: str = field(init=False)
 
-    def __post_init__(self, json) -> None:
-        self._json = json
+    def __post_init__(self, content) -> None:
+        self._content = content
 
     @property
     def ok(self) -> bool:
@@ -32,11 +34,22 @@ class RHresponse:
     @property
     def text(self) -> str:
         """
-        Returns string of json and sets _json if not already set.
+        Returns response content.
 
         returns: str
         """
 
-        if self._text is None:
-            self._text = dumps(self._json)
-        return self._text
+        return self._content
+
+    @property
+    def json(self) -> dict[str, Any]:
+        """
+        Returns content as json
+
+        returns: dict
+        """
+
+        try:
+            return loads(self._content)
+        except JSONDecodeError:
+            raise

@@ -1,6 +1,6 @@
 import pytest
 
-from redhat_insight_api.utils.helper_types import URLstr
+from insights_api.utils.helper_types import URLstr
 
 
 def test_slashes():

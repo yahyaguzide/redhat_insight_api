@@ -29,7 +29,7 @@ class rh_vm_categories(Enum):
 
 
 # NOTE: Class which solemny hold data, nothing else
-class RedHatSystemprofile:
+class RHsystemprofile:
     ansible: str | None = None
     arch: str | None = None
     basearch: str | None = None
@@ -111,7 +111,7 @@ class RedHatSystemprofile:
 
 
 @dataclass(match_args=False)
-class RedHatHost:
+class RHhost:
     id: str
     insights_id: str
     fqdn: str
@@ -120,8 +120,8 @@ class RedHatHost:
     mac_addresses: list[str]
     ip_addressses: list[str]
     _category: rh_vm_categories | None = field(init=False, default=None)
-    systemprofile: RedHatSystemprofile = field(
-        init=False, repr=False, default_factory=RedHatSystemprofile
+    systemprofile: RHsystemprofile = field(
+        init=False, repr=False, default_factory=RHsystemprofile
     )
 
     def __check_if_special(self) -> bool | None:
@@ -153,6 +153,6 @@ class RedHatHost:
         return self._category
 
     def __eq__(self, other: object):
-        if isinstance(other, RedHatHost):
+        if isinstance(other, RHhost):
             return self.id == other.id
         raise TypeError
