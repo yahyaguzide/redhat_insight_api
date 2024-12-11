@@ -3,19 +3,21 @@ RedHat Insights Inventory endpoint
 Documentation: https://console.redhat.com/docs/api/inventory/v1#operations-accounts_staleness-api%5C.staleness%5C.delete_staleness
 """
 
-from insights_api.src.redhat_endpoint_base import RedHatEndpointBase
-from insights_api.src.redhat_insights_adapter import RedHatInsightAdapter
-from insights_api.utils.helper_types import URLstr
-from insights_api.utils.helper_functions import list_to_chunks
+from .rh_endpointbase import RHendpointBase
+from .rh_adapter import RHadapter
+from insights_api.utils._internal_utils import (
+    list_to_chunks,
+    join_url_str,
+)
 
 from requests import Response
 
 
-class RedHatInventories(RedHatEndpointBase):
+class RedHatInventories(RHendpointBase):
     """Inventories Endpoint for RedHat Insights API"""
 
-    def __init__(self, adapter: RedHatInsightAdapter) -> None:
-        super().__init__(adapter=adapter, endpoint=URLstr("inventory/v1"))
+    def __init__(self, adapter: RHadapter) -> None:
+        super().__init__(adapter=adapter, endpoint="inventory/v1")
 
     # """""""""""""""""""""""""""""""""""
     # account_staleness
@@ -458,9 +460,10 @@ class RedHatInventories(RedHatEndpointBase):
         path = "hosts"
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
+        # TODO: finish chunking
 
         return self.adapter.get(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags/count")),
+            endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/tags/count"),
             params=params,
         )
 

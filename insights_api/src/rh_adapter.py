@@ -5,11 +5,11 @@ from dataclasses import InitVar, dataclass, field
 from enum import Enum
 
 from requests import Session, Response
-from insights_api.src.redhat_insights_exceptions import (
+from .rh_exceptions import (
     RHAPIConnectionError,
     RHAPINoTokenError,
 )
-from insights_api.utils.helper_types import URLstr
+from insights_api.utils._internal_utils import join_url_str, cleanup_url_str
 
 
 class Actions(Enum):
@@ -21,7 +21,7 @@ class Actions(Enum):
 
 
 @dataclass(repr=False, eq=False)
-class RedHatInsightAdapter:
+class RHadapter:
     """
     Adapter for the RedHat Insight API.
     Methods like get post delete are predefined here.
@@ -33,14 +33,10 @@ class RedHatInsightAdapter:
     api_token: InitVar[str | None] = field(default=None)
     _refresh_token: str | None = field(init=False)
     _api_token: str | None = field(init=False)
-    base_url: URLstr = field(
-        default_factory=lambda: URLstr("https://console.redhat.com/api")
-    )
+    base_url: str = field(default="https://console.redhat.com/api")
     session: Session = field(default_factory=Session)
-    refresh_url: URLstr = field(
-        default_factory=lambda: URLstr(
-            "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
-        )
+    refresh_url: str = field(
+        default="https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
     )
     headers: dict[str, str] = field(default_factory=dict)
 
@@ -49,6 +45,9 @@ class RedHatInsightAdapter:
 
         self._refresh_token = refresh_token
         self._api_token = api_token
+
+        self.base_url = cleanup_url_str(self.base_url)
+        self.refresh_url = cleanup_url_str(self.refresh_url)
 
         # NOTE: Allow API token to be set individually
         if self._api_token is None:
@@ -100,7 +99,7 @@ class RedHatInsightAdapter:
         if self._api_token is None:
             raise RHAPINoTokenError("No API Token set")
 
-        url = str(self.base_url.join(endpoint))
+        url = join_url_str(self.base_url, endpoint)
         return self.session.request(
             method=action.name,
             url=url,

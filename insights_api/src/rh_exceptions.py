@@ -4,10 +4,6 @@
 class RHAPIConnectionError(Exception):
     """Connection Error for RedHat API"""
 
-    pass
-
 
 class RHAPINoTokenError(Exception):
     """API Token not set"""
-
-    pass
