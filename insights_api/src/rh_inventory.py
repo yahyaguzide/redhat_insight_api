@@ -5,6 +5,8 @@ Documentation: https://console.redhat.com/docs/api/inventory/v1#operations-accou
 
 from .rh_endpointbase import RHendpointBase
 from .rh_adapter import RHadapter
+from .rh_host import RHhost, RHsystemprofile
+from .rh_response import RHresponse
 from insights_api.utils._internal_utils import (
     list_to_chunks,
     join_url_str,
@@ -81,7 +83,7 @@ class RedHatInventories(RHendpointBase):
     # hosts
     # """""""""""""""""""""""""""""""""""
 
-    def get_host_exists(self, insights_id: str) -> Response:
+    def get_host_exists(self, insights_id: str) -> RHresponse:
         """
         Find one host by insights_id, if it exists.
 
@@ -99,11 +101,18 @@ class RedHatInventories(RHendpointBase):
         """
 
         path = "host_exists"
-        return self.adapter.get(
+        response = self.adapter.get(
             endpoint=str(self.endpoint.join(path)), params={"insights_id": insights_id}
         )
+        return RHresponse(
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            reason=response.reason,
+            url=response.url,
+            content=str(response.content),
+        )
 
-    def delete_hosts(self, **params) -> Response:
+    def delete_hosts(self, **params) -> RHresponse:
         """
         Delete the entire list of hosts filtered by the given parameters.
 
@@ -136,7 +145,7 @@ class RedHatInventories(RHendpointBase):
             endpoint=str(self.endpoint.join(path)), params=params
         )
 
-    def get_hosts(self, **params) -> Response:
+    def get_hosts(self, **params) -> RHresponse:
         """
         Read the entire list of all hosts available to the account.
 
@@ -172,7 +181,7 @@ class RedHatInventories(RHendpointBase):
         path = "hosts"
         return self.adapter.get(endpoint=str(self.endpoint.join(path)), params=params)
 
-    def delete_all_hosts(self, confirm_delete_all: bool = False) -> Response:
+    def delete_all_hosts(self, confirm_delete_all: bool = False) -> RHresponse:
         """
         Delete all hosts on the account. The request must include "confirm_delete_all=true".
 
@@ -191,7 +200,7 @@ class RedHatInventories(RHendpointBase):
             params={"confirm_delete_all": str(confirm_delete_all)},
         )
 
-    def post_host_checkin(self, json: dict[str, str]) -> Response:
+    def post_host_checkin(self, json: dict[str, str]) -> RHresponse:
         """
         Finds a host and updates its staleness timestamps. It uses the supplied canonical facts to determine which host to update. By default, the staleness timestamp is set to 1 hour from when the request is received; however, this can be overridden by supplying the interval.
 
@@ -208,7 +217,7 @@ class RedHatInventories(RHendpointBase):
         path = "host/checkin"
         return self.adapter.post(endpoint=str(self.endpoint.join(path)), json=json)
 
-    def delete_hosts_by_id(self, host: str, *hosts: str, branch_id: str) -> Response:
+    def delete_hosts_by_id(self, host: str, *hosts: str, branch_id: str) -> RHresponse:
         """
         Delete hosts by IDs. Accepts Hosts as Parameters.
 
@@ -233,7 +242,7 @@ class RedHatInventories(RHendpointBase):
             params={"branch_id": branch_id},
         )
 
-    def get_hosts_by_id(self, host: str, *hosts, **params) -> Response:
+    def get_hosts_by_id(self, host: str, *hosts, **params) -> RHresponse:
         """
         Find one or more hosts by their ID.
 
@@ -267,7 +276,7 @@ class RedHatInventories(RHendpointBase):
 
     def patch_hosts_by_id(
         self, host: str, *hosts: str, branch_id: str, json: dict[str, str]
-    ) -> Response:
+    ) -> RHresponse:
         """
         Update hosts_ids
 
@@ -302,7 +311,7 @@ class RedHatInventories(RHendpointBase):
         namespace: str,
         json: dict[str, str],
         branch_id: str | None = None,
-    ) -> Response:
+    ) -> RHresponse:
         """
         Merge one or multiple hosts facts under a namespace.
 
@@ -341,7 +350,7 @@ class RedHatInventories(RHendpointBase):
         namespace: str,
         json: dict[str, str],
         branch_id: str | None = None,
-    ) -> Response:
+    ) -> RHresponse:
         """
         Replace facts under a namespace
 
@@ -373,7 +382,7 @@ class RedHatInventories(RHendpointBase):
             json=json,
         )
 
-    def get_hosts_system_profile(self, host: str, *hosts: str, **params) -> Response:
+    def get_hosts_system_profile(self, host: str, *hosts: str, **params) -> RHresponse:
         """
         Find one or more hosts by their ID and return the id and system profile
 
@@ -405,7 +414,7 @@ class RedHatInventories(RHendpointBase):
             params=params,
         )
 
-    def get_hosts_tags(self, host: str, *hosts: str, **params) -> Response:
+    def get_hosts_tags(self, host: str, *hosts: str, **params) -> RHresponse:
         """
         Get the tags on a host
 
@@ -435,7 +444,7 @@ class RedHatInventories(RHendpointBase):
             params=params,
         )
 
-    def get_hosts_tags_count(self, host: str, *hosts: str, **params) -> Response:
+    def get_hosts_tags_count(self, host: str, *hosts: str, **params) -> RHresponse:
         """
         Get the number of tags on a host or hosts
 
