@@ -120,6 +120,9 @@ class RHhost:
     ip_addresses: list[str] = field(default_factory=list)
     systemprofile: RHsystemprofile | None = None
 
+    def set_systemprofile(self, systemprofile: dict[str, Any]) -> None:
+        self.systemprofile = RHsystemprofile(**systemprofile)
+
     def __eq__(self, other: object):
         if isinstance(other, RHhost):
             return self.id == other.id

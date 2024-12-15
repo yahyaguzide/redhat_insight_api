@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from itertools import islice
+from re import findall
 
 
 @staticmethod

@@ -3,19 +3,17 @@ RedHat Insights Inventory endpoint
 Documentation: https://console.redhat.com/docs/api/inventory/v1#operations-accounts_staleness-api%5C.staleness%5C.delete_staleness
 """
 
+from collections.abc import Generator
 from .rh_endpointbase import RHendpointBase
 from .rh_adapter import RHadapter
-from .rh_host import RHhost, RHsystemprofile
 from .rh_response import RHresponse
 from insights_api.utils._internal_utils import (
     list_to_chunks,
     join_url_str,
 )
 
-from requests import Response
 
-
-class RedHatInventories(RHendpointBase):
+class RHInventories(RHendpointBase):
     """Inventories Endpoint for RedHat Insights API"""
 
     def __init__(self, adapter: RHadapter) -> None:
@@ -97,7 +95,7 @@ class RedHatInventories(RHendpointBase):
 
         param insights_id (str): The Inisghts ID of the host
 
-        returns:requests.Response
+        returns: RHresponse
         """
 
         path = "host_exists"
@@ -138,16 +136,24 @@ class RedHatInventories(RHendpointBase):
                 tags
                 filter
 
-        returns:requests.Response
+        returns: RHresponse
         """
         path = "hosts"
-        return self.adapter.delete(
+        response = self.adapter.delete(
             endpoint=str(self.endpoint.join(path)), params=params
+        )
+        return RHresponse(
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            reason=response.reason,
+            url=response.url,
+            content=str(response.content),
         )
 
     def get_hosts(self, **params) -> RHresponse:
         """
-        Read the entire list of all hosts available to the account.
+        Read the list of hosts available to the account.
+        To get all Hosts iterate over all pages.
 
         Required permissions: inventory:hosts:read
 
@@ -176,14 +182,24 @@ class RedHatInventories(RHendpointBase):
                 filter
                 fields
 
-        returns:requests.Response
+        returns: RHresponse
         """
         path = "hosts"
-        return self.adapter.get(endpoint=str(self.endpoint.join(path)), params=params)
+        response = self.adapter.get(
+            endpoint=str(self.endpoint.join(path)), params=params
+        )
+        return RHresponse(
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            reason=response.reason,
+            url=response.url,
+            content=str(response.content),
+        )
 
     def delete_all_hosts(self, confirm_delete_all: bool = False) -> RHresponse:
         """
         Delete all hosts on the account. The request must include "confirm_delete_all=true".
+        Commented out for now!!!
 
         Required permissions: inventory:hosts:write
 
@@ -192,12 +208,26 @@ class RedHatInventories(RHendpointBase):
             400: Invalid request
 
 
-        returns:requests.Response
+        returns: RHresponse
         """
         path = "hosts/all"
-        return self.adapter.delete(
-            endpoint=str(self.endpoint.join(path)),
-            params={"confirm_delete_all": str(confirm_delete_all)},
+        #        response = self.adapter.delete(
+        #            endpoint=str(self.endpoint.join(path)),
+        #            params={"confirm_delete_all": str(confirm_delete_all)},
+        #        )
+        #        return RHresponse(
+        #            status_code=response.status_code,
+        #            headers=dict(response.headers),
+        #            reason=response.reason,
+        #            url=response.url,
+        #            content=str(response.content),
+        #        )
+        return RHresponse(
+            status_code=404,
+            headers={},
+            reason="Not implemented yet",
+            url="",
+            content="",
         )
 
     def post_host_checkin(self, json: dict[str, str]) -> RHresponse:
@@ -211,13 +241,22 @@ class RedHatInventories(RHendpointBase):
 
         param json (dict): Json object to send in the Request body
 
-        returns:requests.Response
+        returns: RHresponse
         """
 
         path = "host/checkin"
-        return self.adapter.post(endpoint=str(self.endpoint.join(path)), json=json)
+        response = self.adapter.post(endpoint=str(self.endpoint.join(path)), json=json)
+        return RHresponse(
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            reason=response.reason,
+            url=response.url,
+            content=str(response.content),
+        )
 
-    def delete_hosts_by_id(self, host: str, *hosts: str, branch_id: str) -> RHresponse:
+    def delete_hosts_by_id(
+        self, host: str, *hosts: str, branch_id: str
+    ) -> Generator[RHresponse]:
         """
         Delete hosts by IDs. Accepts Hosts as Parameters.
 
@@ -232,17 +271,25 @@ class RedHatInventories(RHendpointBase):
         param *hosts (str): host IDs
         param branch_id (str): Filter by branch_id
 
-        returns:requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.delete(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
-            params={"branch_id": branch_id},
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.delete(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                params={"branch_id": branch_id},
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
-    def get_hosts_by_id(self, host: str, *hosts, **params) -> RHresponse:
+    def get_hosts_by_id(self, host: str, *hosts, **params) -> Generator[RHresponse]:
         """
         Find one or more hosts by their ID.
 
@@ -264,19 +311,27 @@ class RedHatInventories(RHendpointBase):
                 order_how
                 fields
 
-        returns:requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.get(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
-            params=params,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.get(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                params=params,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
     def patch_hosts_by_id(
         self, host: str, *hosts: str, branch_id: str, json: dict[str, str]
-    ) -> RHresponse:
+    ) -> Generator[RHresponse]:
         """
         Update hosts_ids
 
@@ -293,16 +348,24 @@ class RedHatInventories(RHendpointBase):
         param json (dict): Json object to be send in the request body.
             A group of fields to be updated on the host
 
-        returns:requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
-            params={"branch_id": branch_id},
-            json=json,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.patch(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                params={"branch_id": branch_id},
+                json=json,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
     def patch_hosts_merge_facts_under_namespace(
         self,
@@ -311,7 +374,7 @@ class RedHatInventories(RHendpointBase):
         namespace: str,
         json: dict[str, str],
         branch_id: str | None = None,
-    ) -> RHresponse:
+    ) -> Generator[RHresponse]:
         """
         Merge one or multiple hosts facts under a namespace.
 
@@ -332,16 +395,24 @@ class RedHatInventories(RHendpointBase):
                   "fact2": "value2"
                 }
 
-        returns:requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.patch(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
-            params={"branch_id": branch_id} if branch_id else None,
-            json=json,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.patch(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+                params={"branch_id": branch_id} if branch_id else None,
+                json=json,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
     def put_hosts_replace_facts_under_namespace(
         self,
@@ -350,7 +421,7 @@ class RedHatInventories(RHendpointBase):
         namespace: str,
         json: dict[str, str],
         branch_id: str | None = None,
-    ) -> RHresponse:
+    ) -> Generator[RHresponse]:
         """
         Replace facts under a namespace
 
@@ -371,18 +442,28 @@ class RedHatInventories(RHendpointBase):
                   "fact2": "value2"
                 }
 
-        returns: requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.put(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
-            params={"branch_id": branch_id} if branch_id else None,
-            json=json,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.put(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+                params={"branch_id": branch_id} if branch_id else None,
+                json=json,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
-    def get_hosts_system_profile(self, host: str, *hosts: str, **params) -> RHresponse:
+    def get_hosts_system_profile(
+        self, host: str, *hosts: str, **params
+    ) -> Generator[RHresponse]:
         """
         Find one or more hosts by their ID and return the id and system profile
 
@@ -404,17 +485,25 @@ class RedHatInventories(RHendpointBase):
                 branch_id
                 fields
 
-        returns: requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.get(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/system_profile")),
-            params=params,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.get(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/system_profile")),
+                params=params,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
-    def get_hosts_tags(self, host: str, *hosts: str, **params) -> RHresponse:
+    def get_hosts_tags(self, host: str, *hosts: str, **params) -> Generator[RHresponse]:
         """
         Get the tags on a host
 
@@ -434,17 +523,27 @@ class RedHatInventories(RHendpointBase):
                 order_how
                 search
 
-        returns: requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
-        hosts_ids = ",".join([host] + list(hosts))
-        return self.adapter.get(
-            endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags")),
-            params=params,
-        )
+        for host_chunk in list_to_chunks([host] + list(hosts), 50):
+            hosts_ids = ",".join(host_chunk)
+            response = self.adapter.get(
+                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags")),
+                params=params,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
-    def get_hosts_tags_count(self, host: str, *hosts: str, **params) -> RHresponse:
+    def get_hosts_tags_count(
+        self, host: str, *hosts: str, **params
+    ) -> Generator[RHresponse]:
         """
         Get the number of tags on a host or hosts
 
@@ -463,18 +562,23 @@ class RedHatInventories(RHendpointBase):
                 order_by
                 order_how
 
-        returns: requests.Response
+        returns: Generator[RHresponse]
         """
 
         path = "hosts"
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
-        # TODO: finish chunking
-
-        return self.adapter.get(
-            endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/tags/count"),
-            params=params,
-        )
+            response = self.adapter.get(
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/tags/count"),
+                params=params,
+            )
+            yield RHresponse(
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                reason=response.reason,
+                url=response.url,
+                content=str(response.content),
+            )
 
     # """""""""""""""""""""""""""""""""""
     # resource-types

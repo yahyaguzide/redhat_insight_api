@@ -3,9 +3,9 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from insights_api.src import redhat_insights_adapter
-from insights_api.src.redhat_insights_adapter import RedHatInsightAdapter
-from insights_api.src.redhat_insights_exceptions import (
+from redhat_insight_api.src import redhat_insights_adapter
+from redhat_insight_api.src.redhat_insights_adapter import RedHatInsightAdapter
+from redhat_insight_api.src.redhat_insights_exceptions import (
     RHAPIConnectionError,
     RHAPINoTokenError,
 )
