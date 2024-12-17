@@ -10,27 +10,28 @@ from insights_api.src.rh_inventory import RHinventory
 def get_all_hosts(inventories: RHinventory) -> list[RHhost]:
     host_objs = []
 
-    page = 0
+    page = 1
     while (
         response := inventories.get_hosts(
             per_page=100,
             page=page,
-            fields="id,insights_id,fqdn,display_name,org_id,mac_addresses,ip_addresses",
+            #            fields="id,insights_id,fqdn,display_name,org_id,mac_addresses,ip_addresses",
         )
     ).status_code == 200:
         tmp = response.json["results"]
         for h in tmp:
-            host_objs.append(RHhost(**h))
-    #                RHhost(
-    #                    id=h["id"],
-    #                    insights_id=h["insights_id"],
-    #                    fqdn=h["fqdn"],
-    #                    display_name=h["display_name"],
-    #                    org_id=h["org_id"],
-    #                    mac_addresses=h["mac_addresses"],
-    #                    ip_addresses=h["ip_addresses"],
-    #                )
-    #            )
+            #            host_objs.append(RHhost(**h))
+            host_objs.append(
+                RHhost(
+                    id=h["id"],
+                    insights_id=h["insights_id"],
+                    fqdn=h["fqdn"],
+                    display_name=h["display_name"],
+                    org_id=h["org_id"],
+                    mac_addresses=h["mac_addresses"],
+                    ip_addresses=h["ip_addresses"],
+                )
+            )
     return host_objs
 
 

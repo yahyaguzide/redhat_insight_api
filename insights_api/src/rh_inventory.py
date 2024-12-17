@@ -108,7 +108,7 @@ class RHinventory(RHendpointBase):
             headers=dict(response.headers),
             reason=response.reason,
             url=response.url,
-            content=str(response.content),
+            content=response.text,
         )
 
     def delete_hosts(self, **params) -> RHresponse:
@@ -148,7 +148,7 @@ class RHinventory(RHendpointBase):
             headers=dict(response.headers),
             reason=response.reason,
             url=response.url,
-            content=str(response.content),
+            content=response.text,
         )
 
     def get_hosts(self, **params) -> RHresponse:
@@ -194,7 +194,7 @@ class RHinventory(RHendpointBase):
             headers=dict(response.headers),
             reason=response.reason,
             url=response.url,
-            content=str(response.content),
+            content=response.text,
         )
 
     def delete_all_hosts(self, confirm_delete_all: bool = False) -> RHresponse:
@@ -221,7 +221,7 @@ class RHinventory(RHendpointBase):
         #            headers=dict(response.headers),
         #            reason=response.reason,
         #            url=response.url,
-        #            content=str(response.content),
+        #            content=response.text,
         #        )
         return RHresponse(
             status_code=404,
@@ -254,7 +254,7 @@ class RHinventory(RHendpointBase):
             headers=dict(response.headers),
             reason=response.reason,
             url=response.url,
-            content=str(response.content),
+            content=response.text,
         )
 
     def delete_hosts_by_id(
@@ -289,7 +289,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def get_hosts_by_id(self, host: str, *hosts, **params) -> Generator[RHresponse]:
@@ -329,7 +329,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def patch_hosts_by_id(
@@ -367,7 +367,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def patch_hosts_merge_facts_under_namespace(
@@ -414,7 +414,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def put_hosts_replace_facts_under_namespace(
@@ -461,7 +461,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def get_hosts_system_profile(
@@ -505,7 +505,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def get_hosts_tags(self, host: str, *hosts: str, **params) -> Generator[RHresponse]:
@@ -543,7 +543,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     def get_hosts_tags_count(
@@ -582,7 +582,7 @@ class RHinventory(RHendpointBase):
                 headers=dict(response.headers),
                 reason=response.reason,
                 url=response.url,
-                content=str(response.content),
+                content=response.text,
             )
 
     # """""""""""""""""""""""""""""""""""
