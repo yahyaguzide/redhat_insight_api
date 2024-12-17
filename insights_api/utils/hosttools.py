@@ -41,6 +41,6 @@ def populate_systemprofiles(inventories: RHinventory, hosts: list[RHhost]) -> No
 
     tmp_hosts = {str(h.id): h for h in hosts}
 
-    for response in inventories.get_hosts_system_profile(*(tmp_hosts.keys())):
+    for response in inventories.get_hosts_system_profile(*list(tmp_hosts.keys())):
         for profile in response.json["results"]:
             tmp_hosts[profile["id"]].set_systemprofile(profile)
