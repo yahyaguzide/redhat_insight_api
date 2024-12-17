@@ -1,12 +1,11 @@
 from collections.abc import Generator
 from itertools import islice
-from re import findall
 
 
 @staticmethod
-def list_to_chunks(lst: list[str], chunk_size: int) -> Generator:
-    iterator = iter(lst)
-    while (chunk := list(islice(iterator, chunk_size))) is not None:
+def list_to_chunks(lst: list[str], chunk_size: int) -> Generator[list[str]]:
+    it = iter(lst)
+    while not (chunk := list(islice(it, chunk_size))):
         yield chunk
 
 

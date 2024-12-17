@@ -13,7 +13,7 @@ from insights_api.utils._internal_utils import (
 )
 
 
-class RHInventories(RHendpointBase):
+class RHinventory(RHendpointBase):
     """Inventories Endpoint for RedHat Insights API"""
 
     def __init__(self, adapter: RHadapter) -> None:
@@ -100,7 +100,8 @@ class RHInventories(RHendpointBase):
 
         path = "host_exists"
         response = self.adapter.get(
-            endpoint=str(self.endpoint.join(path)), params={"insights_id": insights_id}
+            endpoint=join_url_str(self.endpoint, path),
+            params={"insights_id": insights_id},
         )
         return RHresponse(
             status_code=response.status_code,
@@ -140,7 +141,7 @@ class RHInventories(RHendpointBase):
         """
         path = "hosts"
         response = self.adapter.delete(
-            endpoint=str(self.endpoint.join(path)), params=params
+            endpoint=join_url_str(self.endpoint, path), params=params
         )
         return RHresponse(
             status_code=response.status_code,
@@ -186,7 +187,7 @@ class RHInventories(RHendpointBase):
         """
         path = "hosts"
         response = self.adapter.get(
-            endpoint=str(self.endpoint.join(path)), params=params
+            endpoint=join_url_str(self.endpoint, path), params=params
         )
         return RHresponse(
             status_code=response.status_code,
@@ -212,7 +213,7 @@ class RHInventories(RHendpointBase):
         """
         path = "hosts/all"
         #        response = self.adapter.delete(
-        #            endpoint=str(self.endpoint.join(path)),
+        #            endpoint=join_url_str(self.endpoint, path)),
         #            params={"confirm_delete_all": str(confirm_delete_all)},
         #        )
         #        return RHresponse(
@@ -245,7 +246,9 @@ class RHInventories(RHendpointBase):
         """
 
         path = "host/checkin"
-        response = self.adapter.post(endpoint=str(self.endpoint.join(path)), json=json)
+        response = self.adapter.post(
+            endpoint=join_url_str(self.endpoint, path), json=json
+        )
         return RHresponse(
             status_code=response.status_code,
             headers=dict(response.headers),
@@ -278,7 +281,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.delete(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}"),
                 params={"branch_id": branch_id},
             )
             yield RHresponse(
@@ -318,7 +321,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.get(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}"),
                 params=params,
             )
             yield RHresponse(
@@ -355,7 +358,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.patch(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}"),
                 params={"branch_id": branch_id},
                 json=json,
             )
@@ -402,7 +405,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.patch(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/{namespace}"),
                 params={"branch_id": branch_id} if branch_id else None,
                 json=json,
             )
@@ -449,7 +452,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.put(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/{namespace}")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/{namespace}"),
                 params={"branch_id": branch_id} if branch_id else None,
                 json=json,
             )
@@ -492,7 +495,9 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.get(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/system_profile")),
+                endpoint=join_url_str(
+                    self.endpoint, f"{path}/{hosts_ids}/system_profile"
+                ),
                 params=params,
             )
             yield RHresponse(
@@ -530,7 +535,7 @@ class RHInventories(RHendpointBase):
         for host_chunk in list_to_chunks([host] + list(hosts), 50):
             hosts_ids = ",".join(host_chunk)
             response = self.adapter.get(
-                endpoint=str(self.endpoint.join(f"{path}/{hosts_ids}/tags")),
+                endpoint=join_url_str(self.endpoint, f"{path}/{hosts_ids}/tags"),
                 params=params,
             )
             yield RHresponse(

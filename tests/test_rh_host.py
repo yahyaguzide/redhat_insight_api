@@ -550,11 +550,18 @@ def test_creation():
     host_json = json.loads(host_str)
 
     try:
-        rhhost_obj = RHhost(**host_json["results"][0])
+        tmp = host_json["results"][0]
+        rhhost_obj = RHhost(
+            id=tmp["id"],
+            insights_id=tmp["insights_id"],
+            fqdn=tmp["fqdn"],
+            display_name=tmp["display_name"],
+            org_id=tmp["org_id"],
+        )
         rhhost_obj.systemprofile = RHsystemprofile(**systemprofile_json["results"][0])
 
     except Exception as e:
         assert False, f"Error occured which should have not: {e}"
 
     print(rhhost_obj.id)
-    assert rhhost_obj.id == host_json["results"][0][id]
+    assert rhhost_obj.id == host_json["results"][0]["id"]
