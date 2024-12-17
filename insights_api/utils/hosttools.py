@@ -4,10 +4,10 @@ Tools to gather and work with hosts
 
 from insights_api.src.rh_host import RHhost
 
-from insights_api.src.rh_inventory import RHInventories
+from insights_api.src.rh_inventory import RHinventory
 
 
-def get_all_hosts(inventories: RHInventories) -> list[RHhost]:
+def get_all_hosts(inventories: RHinventory) -> list[RHhost]:
     host_objs = []
 
     page = 0
@@ -34,7 +34,7 @@ def get_all_hosts(inventories: RHInventories) -> list[RHhost]:
     return host_objs
 
 
-def populate_systemprofiles(inventories: RHInventories, hosts: list[RHhost]) -> None:
+def populate_systemprofiles(inventories: RHinventory, hosts: list[RHhost]) -> None:
     """
     Read all Systemprofiles and write them to the host objects
     """
