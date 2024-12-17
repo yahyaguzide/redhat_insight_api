@@ -18,6 +18,7 @@ def get_all_hosts(inventories: RHinventory) -> list[RHhost]:
             #            fields="id,insights_id,fqdn,display_name,org_id,mac_addresses,ip_addresses",
         )
     ).status_code == 200:
+        page += 1
         tmp = response.json["results"]
         for h in tmp:
             #            host_objs.append(RHhost(**h))
