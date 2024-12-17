@@ -50,7 +50,7 @@ class RHadapter:
         self.refresh_url = cleanup_url_str(self.refresh_url)
 
         # NOTE: Allow API token to be set individually
-        if self._api_token:
+        if not self._api_token:
             self.refresh_api_token()
         else:
             # NOTE: Set header if only api_token is given
