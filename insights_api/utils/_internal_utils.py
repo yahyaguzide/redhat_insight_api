@@ -5,7 +5,7 @@ from itertools import islice
 @staticmethod
 def list_to_chunks(lst: list[str], chunk_size: int) -> Generator[list[str]]:
     it = iter(lst)
-    while not (chunk := list(islice(it, chunk_size))):
+    while chunk := list(islice(it, chunk_size)):
         yield chunk
 
 
